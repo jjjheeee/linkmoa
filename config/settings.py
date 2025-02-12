@@ -25,7 +25,11 @@ SECRET_KEY = "django-insecure-d&1z@j59vl)vm*j@cvpqc*b_a%z5z*#e$h$x&-p%ur6+yrsx*o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [".ap-northeast-2.compute.amazonaws.com"]
+ALLOWED_HOSTS = [
+    ".ap-northeast-2.compute.amazonaws.com",
+    "linkmoa.shop",
+    "www.linkmoa.shop"
+]
 
 
 # Application definition
