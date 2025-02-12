@@ -27,7 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     ".ap-northeast-2.compute.amazonaws.com",
-    "linkmoa.shop",
+    ".linkmoa.shop",
     "www.linkmoa.shop"
 ]
 
