@@ -4,5 +4,5 @@ from .views import index, healthcheck
 
 urlpatterns = [
     path('healthcheck', healthcheck, name='healthcheck'),
-    path('', index, name='main'),
+    path("", index, name='main'),
 ]
