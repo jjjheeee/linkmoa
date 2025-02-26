@@ -32,7 +32,7 @@ def logout_view(request):
     logout(request)
     return redirect("main")
 
-@login_required(login_url="/login")
+# @login_required(login_url="/login")
 def index(request):
     # User.objects.create_user(email="testuser@test.com", password="password123")
     user = request.user  # 현재 로그인된 유저 정보 가져오기
