@@ -137,4 +137,8 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
 SESSION_CACHE_ALIAS = 'default'
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+SESSION_COOKIE_DOMAIN = '.linkmoa.shop'  # 모든 하위 도메인을 포함
+SESSION_COOKIE_SAMESITE = 'None'         # 외부 리디렉션에도 쿠키가 유지되도록; 주의: Secure 옵션이 필요함
+SESSION_COOKIE_SECURE = True             # HTTPS에서만 쿠키 전송
 CSRF_COOKIE_SECURE = True
