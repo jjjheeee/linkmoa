@@ -1,6 +1,6 @@
 [Unit]
 Description=uWSGI service
-After=syslog.target
+After=network.target nginx.service
 
 [Service]
 ExecStart=/home/ubuntu/myvenv/bin/uwsgi -i /srv/linkmoa/.linkmoa/uwsgi/linkmoa.ini
