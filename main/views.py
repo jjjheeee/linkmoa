@@ -30,6 +30,8 @@ def login_view(request):
 
 def logout_view(request):
     logout(request)
+    response = redirect("main")
+    response.delete_cookie('sessionid')
     return redirect("main")
 
 # @login_required(login_url="/login")
