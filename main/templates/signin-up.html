@@ -1,0 +1,43 @@
+{% extends "index.html" %}
+{% load static %}
+
+{% block content %}
+  <link href="{% static 'css/signin-up.css' %}" rel="stylesheet" />
+  <section class="login">
+    <div class="login_box">
+      <div class="left">
+        <div class="top_link"><a href="/">Return home</a></div>
+        <div class="contact">
+          <form method="POST">
+            {% csrf_token %}
+            <h3>SIGN IN</h3>
+            
+            <!-- 이메일 필드 -->
+            <input type="email" name="email" placeholder="EMAIL" value="{{ form.email.value|default:'' }}">
+            <!-- 비밀번호 필드 -->
+            <input type="password" name="password" placeholder="PASSWORD" value="{{ form.password.value|default:'' }}">
+            
+            {% if form.non_field_errors %}
+              <div class="alert alert-danger">
+                  {% for error in form.non_field_errors %}
+                      <p>{{ error }}</p>
+                  {% endfor %}
+              </div>
+          {% endif %}
+            
+            <button type="submit" class="submit">LET'S GO</button>
+          </form>
+        </div>
+      </div>
+      <div class="right">
+        <img src="{% static 'img/j_image.jpg' %}" alt="Background Image" class="background-img">
+        {% comment %} <div class="right-text">
+          <h2>LONYX</h2>
+          <h5>A UX BASED CREATIVE AGENCEY</h5>
+        </div>
+        <div class="right-inductor"></div> {% endcomment %}
+      </div>
+    </div>
+  </section>
+
+{% endblock content %}

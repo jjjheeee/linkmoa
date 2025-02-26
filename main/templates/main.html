@@ -1,9 +1,10 @@
 {% extends "index.html" %}
+{% load static %}
 
 {% block content %}
     <div class="d-flex" id="wrapper">
         <!-- Sidebar-->
-        <div class="border-end bg-white" id="sidebar-wrapper">
+        {% comment %} <div class="border-end bg-white" id="sidebar-wrapper">
             <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
             <div class="list-group list-group-flush">
                 <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Dashboard</a>
@@ -13,37 +14,136 @@
                 <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Profile</a>
                 <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Status</a>
             </div>
-        </div>
+        </div> {% endcomment %}
         <!-- Page content wrapper-->
         <div id="page-content-wrapper">
             <!-- Top navigation-->
             <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
                 <div class="container-fluid">
-                    <button class="btn btn-primary" id="sidebarToggle">Toggle Menu</button>
-                    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
-                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                        <ul class="navbar-nav ms-auto mt-2 mt-lg-0">
-                            <li class="nav-item active"><a class="nav-link" href="#!">Home</a></li>
-                            <li class="nav-item"><a class="nav-link" href="#!">Link</a></li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Dropdown</a>
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="#!">Action</a>
-                                    <a class="dropdown-item" href="#!">Another action</a>
-                                    <div class="dropdown-divider"></div>
-                                    <a class="dropdown-item" href="#!">Something else here</a>
-                                </div>
-                            </li>
+                    <div class="d-flex">
+                        <h2>내 폴더</h2>
+                        {% comment %} <button class="btn btn-primary" id="sidebarToggle">접기</button> {% endcomment %}
+                        {% comment %} {% if user.is_authenticated %}
+                            <button class="btn btn-primary ms-3" id="createFolder">폴더 생성</button>
+                        {% endif %} {% endcomment %}
+                    </div>
+            
+                    <div class="d-flex ms-auto">
+                        <ul class="navbar-nav">
+                            {% if user.is_authenticated %}
+                                {% comment %} <li class="nav-item active"><a class="nav-link">안녕하세요, {{ user.email }}님!</a></li> {% endcomment %}
+                                <li class="nav-item active"><a class="nav-link" href="{% url 'logout' %}">로그아웃</a></li>
+                            {% else %}
+                                <li class="nav-item active"><a class="nav-link" href="{% url 'login' %}">로그인</a></li>
+                            {% endif %}
                         </ul>
                     </div>
                 </div>
             </nav>
             <!-- Page content-->
-            <div class="container-fluid">
-                <h1 class="mt-4">URL 사이트 Test</h1>
+            <div class="container-fluid mt-5">
+                {% if user.is_authenticated %}
+                    <!-- 검색 입력창 (상단 오른쪽 정렬) -->
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        
+                        <button class="btn btn-primary" id="createFolder">폴더 생성</button>
+                        <input type="text" class="form-control w-25" placeholder="폴더 검색" id="folderSearch">
+
+                        <!-- 폴더 생성 모달 -->
+                        <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="createFolderModalLabel">폴더 생성</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <!-- 폴더 이름 입력 폼 -->
+                                        <div class="mb-3">
+                                            <label for="folderNameInput" class="form-label">폴더 이름</label>
+                                            <input type="text" class="form-control" id="folderNameInput" placeholder="폴더 이름을 입력하세요">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                        <button type="button" class="btn btn-primary" id="saveFolderButton">저장</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+            
+                    <!-- 폴더 리스트 -->
+                    <ul class="list-group">
+                        {% for folder in folders %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <!-- 폴더 이름 클릭 시 모달 오픈 -->
+                                <a href="#" class="folder-name text-decoration-none" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">{{ folder.name }}</a>
+                                <div>
+                                    <button class="btn btn-sm btn-success me-2">수정</button>
+                                    <button class="btn btn-sm btn-danger">삭제</button>
+                                </div>
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-center">폴더가 없습니다.</li>
+                        {% endfor %}
+                    </ul>
+                    
+                    <!-- url list 모달 창 -->
+                    <div class="modal fade" id="folderModal" tabindex="-1" aria-labelledby="folderModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="folderModalLabel">폴더 내용</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <ul id="urlList" class="list-group">
+                                        <!-- URL 리스트가 여기에 동적으로 추가됨 -->
+                                    </ul>
+                                </div>
+                                <div class="modal-footer">
+                                    {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button> {% endcomment %}
+                                    <button type="button" class="btn btn-primary" id="addUrlButton">추가</button> <!-- 추가 버튼 -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- URL 추가 모달 -->
+                    <div class="modal fade" id="addUrlModal" tabindex="-1" aria-labelledby="addUrlModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addUrlModalLabel">URL 추가</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="mb-3">
+                                        <label for="urlInput" class="form-label">URL</label>
+                                        <input type="url" class="form-control" id="urlInput" placeholder="URL을 입력하세요">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="aliasInput" class="form-label">별칭</label>
+                                        <input type="text" class="form-control" id="aliasInput" placeholder="별칭을 입력하세요">
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                    <button type="button" class="btn btn-primary" id="saveUrlButton">저장</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <h1 class="mt-4">URL 사이트 Test</h1>
+                {% endif %}
             </div>
         </div>
+        <!-- 커스텀 JS -->
+        <script src="{% static 'js/main.js' %}"></script>
     </div>
-
 {% endblock content %}
 
