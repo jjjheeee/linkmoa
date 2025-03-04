@@ -4,17 +4,49 @@
 {% block content %}
     <div class="d-flex" id="wrapper">
         <!-- Sidebar-->
-        {% comment %} <div class="border-end bg-white" id="sidebar-wrapper">
-            <div class="sidebar-heading border-bottom bg-light">Start Bootstrap</div>
+        <div class="border-end bg-white" id="sidebar-wrapper">
+            <div class="sidebar-heading border-bottom bg-light"><button class="btn btn-primary" id="createFolder">폴더 생성</button></div>
             <div class="list-group list-group-flush">
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Dashboard</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Shortcuts</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Overview</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Events</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Profile</a>
-                <a class="list-group-item list-group-item-action list-group-item-light p-3" href="#!">Status</a>
+                <ul class="list-group">
+                    {% for folder in folders %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <!-- 폴더 이름 클릭 시 모달 오픈 -->
+                            <a href="#" class="folder-name text-decoration-none" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">{{ folder.name }}</a>
+                            <div>
+                                <button class="btn btn-sm"><i class="fi fi-tr-pen-square"></i></button>
+                                <button class="btn btn-sm"><i class="fi fi-rr-trash"></i></button>
+                            </div>
+                        </li>
+                    {% empty %}
+                        <li class="list-group-item text-center">폴더가 없습니다.</li>
+                    {% endfor %}
+                </ul>
+
+                <!-- 폴더 생성 모달 -->
+                <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="createFolderModalLabel">폴더 생성</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <!-- 폴더 이름 입력 폼 -->
+                                <div class="mb-3">
+                                    <label for="folderNameInput" class="form-label">폴더 이름</label>
+                                    <input type="text" class="form-control" id="folderNameInput" placeholder="폴더 이름을 입력하세요">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                <button type="button" class="btn btn-primary" id="saveFolderButton">저장</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
-        </div> {% endcomment %}
+        </div>
         <!-- Page content wrapper-->
         <div id="page-content-wrapper">
             <!-- Top navigation-->
@@ -22,10 +54,6 @@
                 <div class="container-fluid">
                     <div class="d-flex">
                         <h2>내 폴더</h2>
-                        {% comment %} <button class="btn btn-primary" id="sidebarToggle">접기</button> {% endcomment %}
-                        {% comment %} {% if user.is_authenticated %}
-                            <button class="btn btn-primary ms-3" id="createFolder">폴더 생성</button>
-                        {% endif %} {% endcomment %}
                     </div>
             
                     <div class="d-flex ms-auto">
@@ -44,68 +72,43 @@
             <div class="container-fluid mt-5">
                 {% if user.is_authenticated %}
                     <!-- 검색 입력창 (상단 오른쪽 정렬) -->
-                    <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div class="d-flex justify-content-end align-items-center mb-3">
                         
-                        <button class="btn btn-primary" id="createFolder">폴더 생성</button>
-                        <input type="text" class="form-control w-25" placeholder="폴더 검색" id="folderSearch">
+                        <button type="button" class="btn btn-primary" id="addUrlButton">Url추가</button>
+                        <input type="text" class="form-control w-25" placeholder="검색" id="folderSearch">
 
-                        <!-- 폴더 생성 모달 -->
-                        <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
-                            <div class="modal-dialog">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title" id="createFolderModalLabel">폴더 생성</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div class="modal-body">
-                                        <!-- 폴더 이름 입력 폼 -->
-                                        <div class="mb-3">
-                                            <label for="folderNameInput" class="form-label">폴더 이름</label>
-                                            <input type="text" class="form-control" id="folderNameInput" placeholder="폴더 이름을 입력하세요">
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                        <button type="button" class="btn btn-primary" id="saveFolderButton">저장</button>
-                                    </div>
+                    </div>
+                    <!-- URL 카드 리스트 -->
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        <div class="col">
+                            <div class="card">
+                                <img src="{% static 'img/j_image.jpg' %}" class="card-img-top" alt="사이트 썸네일">
+                                <div class="card-body">
+                                    <h5 class="card-title">사이트 제목 1</h5>
+                                    <p class="card-text">이곳에 설명을 추가할 수 있습니다.</p>
+                                    <a href="#" class="btn btn-primary">바로가기</a>
                                 </div>
                             </div>
                         </div>
 
-                    </div>
-            
-                    <!-- 폴더 리스트 -->
-                    <ul class="list-group">
-                        {% for folder in folders %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <!-- 폴더 이름 클릭 시 모달 오픈 -->
-                                <a href="#" class="folder-name text-decoration-none" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">{{ folder.name }}</a>
-                                <div>
-                                    <button class="btn btn-sm btn-success me-2">수정</button>
-                                    <button class="btn btn-sm btn-danger">삭제</button>
+                        <div class="col">
+                            <div class="card">
+                                <img src="{% static 'img/j_image.jpg' %}" class="card-img-top" alt="사이트 썸네일">
+                                <div class="card-body">
+                                    <h5 class="card-title">사이트 제목 2</h5>
+                                    <p class="card-text">이곳에 설명을 추가할 수 있습니다.</p>
+                                    <a href="#" class="btn btn-primary">바로가기</a>
                                 </div>
-                            </li>
-                        {% empty %}
-                            <li class="list-group-item text-center">폴더가 없습니다.</li>
-                        {% endfor %}
-                    </ul>
-                    
-                    <!-- url list 모달 창 -->
-                    <div class="modal fade" id="folderModal" tabindex="-1" aria-labelledby="folderModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="folderModalLabel">폴더 내용</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <ul id="urlList" class="list-group">
-                                        <!-- URL 리스트가 여기에 동적으로 추가됨 -->
-                                    </ul>
-                                </div>
-                                <div class="modal-footer">
-                                    {% comment %} <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">닫기</button> {% endcomment %}
-                                    <button type="button" class="btn btn-primary" id="addUrlButton">추가</button> <!-- 추가 버튼 -->
+                            </div>
+                        </div>
+
+                        <div class="col">
+                            <div class="card">
+                                <img src="{% static 'img/j_image.jpg' %}" class="card-img-top" alt="사이트 썸네일">
+                                <div class="card-body">
+                                    <h5 class="card-title">사이트 제목 3</h5>
+                                    <p class="card-text">이곳에 설명을 추가할 수 있습니다.</p>
+                                    <a href="#" class="btn btn-primary">바로가기</a>
                                 </div>
                             </div>
                         </div>
@@ -138,7 +141,7 @@
                     </div>
 
                 {% else %}
-                    <h1 class="mt-4">URL 사이트 Test</h1>
+                    <h1 class="mt-4">로그인 해주세용</h1>
                 {% endif %}
             </div>
         </div>
