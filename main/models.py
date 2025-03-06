@@ -107,3 +107,4 @@ class UrlList(models.Model):
     description = models.TextField(
         blank=True, null=True
     )
+    image = models.TextField()

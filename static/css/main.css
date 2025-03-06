@@ -1,0 +1,15 @@
+.list-group-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.folder-name {
+    flex: 1; /* 가용 공간 최대한 사용 */
+    min-width: 0; /* flex 아이템의 크기 조정 허용 */
+    font-size: 1.5rem;
+    font-weight: bold;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

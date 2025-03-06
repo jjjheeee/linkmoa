@@ -5,17 +5,12 @@
     <div class="d-flex" id="wrapper">
         <!-- Sidebar-->
         <div class="border-end bg-white" id="sidebar-wrapper">
-            <div class="sidebar-heading border-bottom bg-light"><button class="btn btn-primary" id="createFolder">폴더 생성</button></div>
+            <div class="sidebar-heading border-bottom bg-light p-3"><button class="btn btn-primary" id="createFolder">폴더 생성</button></div>
             <div class="list-group list-group-flush">
                 <ul class="list-group">
                     {% for folder in folders %}
-                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                            <!-- 폴더 이름 클릭 시 모달 오픈 -->
+                        <li class="list-group-item d-flex justify-content-between align-items-center p-4">
                             <a href="#" class="folder-name text-decoration-none" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">{{ folder.name }}</a>
-                            <div>
-                                <button class="btn btn-sm"><i class="fi fi-tr-pen-square"></i></button>
-                                <button class="btn btn-sm"><i class="fi fi-rr-trash"></i></button>
-                            </div>
                         </li>
                     {% empty %}
                         <li class="list-group-item text-center">폴더가 없습니다.</li>
@@ -32,14 +27,17 @@
                             </div>
                             <div class="modal-body">
                                 <!-- 폴더 이름 입력 폼 -->
-                                <div class="mb-3">
-                                    <label for="folderNameInput" class="form-label">폴더 이름</label>
-                                    <input type="text" class="form-control" id="folderNameInput" placeholder="폴더 이름을 입력하세요">
-                                </div>
+                                <form id="createFolderForm" method="POST" action="/create-folder/">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label for="folderNameInput" class="form-label">폴더 이름</label>
+                                        <input type="text" class="form-control" id="folderNameInput" name="folderName" placeholder="폴더 이름을 입력하세요">
+                                    </div>
+                                </form>
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                <button type="button" class="btn btn-primary" id="saveFolderButton">저장</button>
+                                <button type="submit" class="btn btn-primary" form="createFolderForm">저장</button>
                             </div>
                         </div>
                     </div>
@@ -51,9 +49,9 @@
         <div id="page-content-wrapper">
             <!-- Top navigation-->
             <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom">
-                <div class="container-fluid">
+                <div class="container-fluid p-1">
                     <div class="d-flex">
-                        <h2>내 폴더</h2>
+                        <h2>Link Moa</h2>
                     </div>
             
                     <div class="d-flex ms-auto">
@@ -71,25 +69,68 @@
             <!-- Page content-->
             <div class="container-fluid mt-5">
                 {% if user.is_authenticated %}
-                    <!-- 검색 입력창 (상단 오른쪽 정렬) -->
-                    <div class="d-flex justify-content-end align-items-center mb-3">
-                        
-                        <button type="button" class="btn btn-primary" id="addUrlButton">Url추가</button>
-                        <input type="text" class="form-control w-25" placeholder="검색" id="folderSearch">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="fs-1" id="selectFolder">{{ folders.0.name }}</div>
+                            
+                            <!-- 버튼들 중앙 정렬 -->
+                            <div class="d-flex justify-content-center align-items-center ms-3">
+                                <button class="btn btn-lg"><i class="fi fi-tr-pen-square py-0" style="font-size: 2rem;"></i></button>
+                                <button class="btn btn-lg"><i class="fi fi-rr-trash py-0" style="font-size: 2rem;"></i></button>
+                                <button type="button" class="btn btn-primary ms-5" id="addUrlButton">URL추가</button>
+                            </div>
 
-                    </div>
-                    <!-- URL 카드 리스트 -->
-                    <div class="row row-cols-1 row-cols-md-3 g-4">
-                        <div class="col">
-                            <div class="card">
-                                <img src="{% static 'img/j_image.jpg' %}" class="card-img-top" alt="사이트 썸네일">
-                                <div class="card-body">
-                                    <h5 class="card-title">사이트 제목 1</h5>
-                                    <p class="card-text">이곳에 설명을 추가할 수 있습니다.</p>
-                                    <a href="#" class="btn btn-primary">바로가기</a>
+                            <!-- URL 추가 모달 -->
+                            <div class="modal fade" id="addUrlModal" tabindex="-1" aria-labelledby="addUrlModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="addUrlModalLabel">URL 추가</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <!-- 폼 시작 -->
+                                            <form id="addUrlForm" method="POST" action="/add-url/">
+                                                {% csrf_token %}
+                                                <div class="mb-3">
+                                                    <label for="urlInput" class="form-label">URL</label>
+                                                    <input type="url" class="form-control" id="urlInput" name="url" placeholder="URL을 입력하세요">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label for="aliasInput" class="form-label">설명</label>
+                                                    <input type="text" class="form-control" id="aliasInput" name="alias" placeholder="설명을 입력하세요">
+                                                </div>
+                                            </form>
+                                            <!-- 폼 끝 -->
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                                            <!-- 저장 버튼을 submit로 변경 -->
+                                            <button type="submit" class="btn btn-primary" form="addUrlForm">저장</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
+
                         </div>
+                    
+                        {% comment %} <div class="d-flex align-items-center">
+                            <input type="text" class="form-control w-100" placeholder="검색" id="folderSearch">
+                        </div> {% endcomment %}
+                    </div>
+                    <!-- URL 카드 리스트 -->
+                    <div id="url-list-container" class="row row-cols-1 row-cols-sm-2 row-cols-lg-4 g-4">
+                        {% comment %} <a href="#" class="text-decoration-none">
+                            <div class="col">
+                                <div class="card">
+                                    <img src="{% static 'img/j_image.jpg' %}" class="card-img-top" alt="사이트 썸네일">
+                                    <div class="card-body">
+                                        <h5 class="card-title">사이트 제목 1</h5>
+                                        <p class="card-text">이곳에 설명을 추가할 수 있습니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
 
                         <div class="col">
                             <div class="card">
@@ -111,33 +152,7 @@
                                     <a href="#" class="btn btn-primary">바로가기</a>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- URL 추가 모달 -->
-                    <div class="modal fade" id="addUrlModal" tabindex="-1" aria-labelledby="addUrlModalLabel" aria-hidden="true">
-                        <div class="modal-dialog">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="addUrlModalLabel">URL 추가</h5>
-                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="mb-3">
-                                        <label for="urlInput" class="form-label">URL</label>
-                                        <input type="url" class="form-control" id="urlInput" placeholder="URL을 입력하세요">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="aliasInput" class="form-label">별칭</label>
-                                        <input type="text" class="form-control" id="aliasInput" placeholder="별칭을 입력하세요">
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                    <button type="button" class="btn btn-primary" id="saveUrlButton">저장</button>
-                                </div>
-                            </div>
-                        </div>
+                        </div> {% endcomment %}
                     </div>
 
                 {% else %}
