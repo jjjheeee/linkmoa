@@ -89,24 +89,24 @@
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
-                                            <!-- 폼 시작 -->
-                                            <form id="addUrlForm" method="POST" action="/add-url/">
-                                                {% csrf_token %}
-                                                <div class="mb-3">
-                                                    <label for="urlInput" class="form-label">URL</label>
-                                                    <input type="url" class="form-control" id="urlInput" name="url" placeholder="URL을 입력하세요">
-                                                </div>
-                                                <div class="mb-3">
-                                                    <label for="aliasInput" class="form-label">설명</label>
-                                                    <input type="text" class="form-control" id="aliasInput" name="alias" placeholder="설명을 입력하세요">
-                                                </div>
-                                            </form>
-                                            <!-- 폼 끝 -->
+                                            <!-- 로딩 스피너 -->
+                                            <div id="loadingSpinner" class="spinner-border text-primary" style="position: absolute; top: 50%; left: 50%; display: none;" role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                            
+                                            <!-- URL 추가 입력 필드 -->
+                                            <div class="mb-3">
+                                                <label for="urlInput" class="form-label">URL</label>
+                                                <input type="url" class="form-control" id="urlInput" name="url" placeholder="URL을 입력하세요">
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="aliasInput" class="form-label">설명</label>
+                                                <input type="text" class="form-control" id="aliasInput" name="alias" placeholder="설명을 입력하세요">
+                                            </div>
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                            <!-- 저장 버튼을 submit로 변경 -->
-                                            <button type="submit" class="btn btn-primary" form="addUrlForm">저장</button>
+                                            <button id="submitAddUrlButton" type="button" class="btn btn-primary">저장</button>
                                         </div>
                                     </div>
                                 </div>
@@ -154,6 +154,8 @@
                             </div>
                         </div> {% endcomment %}
                     </div>
+
+                    
 
                 {% else %}
                     <h1 class="mt-4">로그인 해주세용</h1>

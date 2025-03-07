@@ -6,12 +6,16 @@ from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import User, FolderCategory, UrlList
-
 from .forms import LoginForm
 
-import requests
+from dotenv import load_dotenv
 
+import requests
+import os
+import json
 # Create your views here.
+
+load_dotenv()
 
 def healthcheck(request):
     return HttpResponse("OK", status=200)
@@ -48,13 +52,6 @@ def index(request):
         "folders":folder_data
     }
 
-    # url = 'https://api.microlink.io'
-    # params = {'url': 'https://www.youtube.com/watch?v=xGZT4xyxqsE'}
-
-    # response = requests.get(url, params)
-
-    # print(response.json())
-
     return render(request, "main.html", data)
 
 @require_http_methods(["POST"])
@@ -65,8 +62,23 @@ def create_folder_name(request):
 
 @require_http_methods(["POST"])
 def add_url(request):
-    print(request.POST.get("url"))
-    return redirect("main")
+    data = json.loads(request.body)  # JSON 데이터 파싱
+    folder_id = data.get("folder_id")
+    url = data.get("url")
+    description = data.get("description")
+
+    open_graph_url = os.getenv("GET_URL_DATA_API")
+    params = {'url': url}
+    response = requests.get(open_graph_url, params).json()
+
+    response_data = response.get("data")
+    name = response_data.get("title")
+    image = response_data.get("image").get("url")
+
+    UrlList.objects.create(name=name, link=url, image=image, folder_category_id=folder_id, description=description)
+
+    return JsonResponse({"success": True})
+
 
 @require_http_methods(["GET"])
 def get_urls(request,folder_id):
