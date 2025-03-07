@@ -64,9 +64,26 @@ def create_folder_name(request):
 def add_url(request):
     data = json.loads(request.body)  # JSON 데이터 파싱
     folder_id = data.get("folder_id")
-    url = data.get("url")
+    first_url = data.get("url")
     description = data.get("description")
 
+    split_url = first_url.split("//")
+    if not split_url[1][:4] == "www." :
+        finish_url = split_url[0] + "//www." + split_url[1]
+    else:
+        finish_url = first_url
+    
+    try:
+        name, image = get_url_data(finish_url)
+    except:
+        name, image = get_url_data(first_url)
+        finish_url = first_url
+
+    UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
+
+    return JsonResponse({"success": True})
+
+def get_url_data(url):
     open_graph_url = os.getenv("GET_URL_DATA_API")
     params = {'url': url}
     response = requests.get(open_graph_url, params).json()
@@ -75,10 +92,7 @@ def add_url(request):
     name = response_data.get("title")
     image = response_data.get("image").get("url")
 
-    UrlList.objects.create(name=name, link=url, image=image, folder_category_id=folder_id, description=description)
-
-    return JsonResponse({"success": True})
-
+    return name, image
 
 @require_http_methods(["GET"])
 def get_urls(request,folder_id):
