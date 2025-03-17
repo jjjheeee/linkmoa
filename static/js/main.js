@@ -6,9 +6,11 @@ document.addEventListener("DOMContentLoaded", function () {
     const folderLinks = document.querySelectorAll(".folder-name");
     const selectFolder = document.getElementById("selectFolder");
     
-    const firstFolderId = folderLinks[0].dataset.folderId;
-    selectedFolderId = firstFolderId
-    loadUrlsForFolder(firstFolderId);
+    if (folderLinks.length > 0){
+        const firstFolderId = folderLinks[0].dataset.folderId;
+        selectedFolderId = firstFolderId
+        loadUrlsForFolder(firstFolderId);
+    }
 
     folderLinks.forEach(link => {
         link.addEventListener("click", function (event) {
