@@ -170,3 +170,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# SQLite 데이터베이스 무시
+db.sqlite3
