@@ -22,43 +22,51 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // "추가" 버튼 클릭 시 URL과 별칭을 입력받는 모달 띄우기
+    // URL 추가 버튼 클릭 시 URL과 별칭을 입력받는 모달 띄우기
     const addUrlButton = document.getElementById("addUrlButton");
-    addUrlButton.addEventListener("click", function () {
-        const addUrlModal = new bootstrap.Modal(document.getElementById("addUrlModal"));
-        addUrlModal.show();
-        document.getElementById("urlInput").value = ''; // URL 입력 필드 비우기
-        document.getElementById("aliasInput").value = ''; // 설명 입력 필드 비우기
-    });
+    if (addUrlButton) {
+
+        addUrlButton.addEventListener("click", function () {
+            if (selectedFolderId) {
+                const UrlModal = new bootstrap.Modal(document.getElementById("urlModal"));
+                UrlModal.show();
+                document.getElementById("urlInput").value = ''; // URL 입력 필드 비우기
+                document.getElementById("aliasInput").value = ''; // 설명 입력 필드 비우기
+            } else {
+                alert("폴더를 먼저 생성해주세요.")
+            }
+        });
+
+        // URL 추가 버튼 클릭 시 선택된 폴더 ID를 form에 추가
+        // document.getElementById("addUrlButton").addEventListener("click", function () {
+        //     if (selectedFolderId) {
+        //         let form = document.getElementById("addUrlForm");
+        //         let existingInput = document.getElementById("folderIdInput");
+                
+        //         if (!existingInput) {
+        //             let input = document.createElement("input");
+        //             input.type = "hidden";
+        //             input.name = "folder_id";
+        //             input.id = "folderIdInput";
+        //             input.value = selectedFolderId;
+        //             form.appendChild(input);
+        //         } else {
+        //             existingInput.value = selectedFolderId;
+        //         }
+        //     }
+        // });
+    }
 
     // 폴더 생성 js
     const createFolderButton = document.getElementById("createFolder");  // 폴더 생성 버튼
-    const createFolderModal = new bootstrap.Modal(document.getElementById("createFolderModal"));  // 모달
+    const FolderModal = new bootstrap.Modal(document.getElementById("FolderModal"));  // 모달
 
     // 폴더 생성 버튼 클릭 시 모달 열기
     createFolderButton.addEventListener("click", function () {
-        createFolderModal.show();
+        FolderModal.show();
         document.getElementById("folderNameInput").value = '';
     });
 
-    // URL 추가 버튼 클릭 시 선택된 폴더 ID를 form에 추가
-    document.getElementById("addUrlButton").addEventListener("click", function () {
-        if (selectedFolderId) {
-            let form = document.getElementById("addUrlForm");
-            let existingInput = document.getElementById("folderIdInput");
-            
-            if (!existingInput) {
-                let input = document.createElement("input");
-                input.type = "hidden";
-                input.name = "folder_id";
-                input.id = "folderIdInput";
-                input.value = selectedFolderId;
-                form.appendChild(input);
-            } else {
-                existingInput.value = selectedFolderId;
-            }
-        }
-    });
 
 });
 
@@ -85,7 +93,7 @@ function loadUrlsForFolder(folderId) {
                                     <img src="${url.image}" class="card-img-top" alt="사이트 썸네일">
                                     <div class="card-body">
                                         <h5 class="card-title">${url.name}</h5>
-                                        <p class="card-text">${url.link}</p>
+                                        ${url.description ? `<p class="card-text">${url.description}</p>` : ""}
                                     </div>
                                 </div>
                             </div>
@@ -113,8 +121,9 @@ folderLinks.forEach(link => {
     });
 });
 
-const submitaddUrlButton = document.querySelector('#submitAddUrlButton')
-submitaddUrlButton.addEventListener('click',function(event){
+// URL 저장 로직
+const submitUrlButton = document.querySelector('#submitUrlButton')
+submitUrlButton.addEventListener('click',function(event){
 
     
     const url = document.getElementById("urlInput").value.trim();
@@ -145,9 +154,9 @@ submitaddUrlButton.addEventListener('click',function(event){
     .then(data => {
         if (data.success) {
              // 모달 닫기
-             const addUrlModalElement = document.getElementById("addUrlModal");
-             const addUrlModal = bootstrap.Modal.getInstance(addUrlModalElement); 
-             addUrlModal.hide();
+             const UrlModalElement = document.getElementById("urlModal");
+             const UrlModal = bootstrap.Modal.getInstance(UrlModalElement); 
+             UrlModal.hide();
             // document.getElementById("addUrlModal").classList.remove("show"); // 모달 닫기
             // document.body.classList.remove("modal-open");
             // document.querySelector(".modal-backdrop").remove();
@@ -170,52 +179,44 @@ submitaddUrlButton.addEventListener('click',function(event){
 
 });
 
+// 토큰 가져오기
 function getCsrfToken() {
     return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 }
-// document.addEventListener("DOMContentLoaded", function () {
-//     const createFolderButton = document.getElementById("createFolder");  // 폴더 생성 버튼
-//     const createFolderModal = new bootstrap.Modal(document.getElementById("createFolderModal"));  // 모달
 
-//     // 폴더 생성 버튼 클릭 시 모달 열기
-//     createFolderButton.addEventListener("click", function () {
-//         createFolderModal.show();
-//     });
 
-//     // const saveFolderButton = document.getElementById("saveFolderButton");
-//     // saveFolderButton.addEventListener("click", function () {
-//     //     const folderName = document.getElementById("folderNameInput").value.trim();
+// 폴더 삭제
+function delete_folder() {
+    if (confirm("이 폴더를 삭제하시겠습니까?")) {
+        
+        console.log("폴더 삭제 함수 실행됨");
+        fetch("/folder-api/", {
+            method: "DELETE",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCsrfToken() // CSRF 토큰 가져오기
+            },
+            body: JSON.stringify({
+                folder_id: selectedFolderId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert("폴더가 삭제되었습니다.");
+                window.location.href = "/";  // 메인 페이지로 리다이렉트
+            } else {
+                alert(data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+}
 
-//     //     if (folderName) {
 
-//     //         // 폼 데이터 준비
-//     //         const formData = new FormData();
-//     //         formData.append('folderName', folderName);
-//     //         formData.append('csrfmiddlewaretoken', document.querySelector('[name=csrfmiddlewaretoken]').value);
-
-//     //         // AJAX를 이용해 서버로 폴더 생성 요청
-//     //         fetch('/create-folder/', {
-//     //             method: 'POST',
-//     //             body: formData
-//     //         })
-//     //         .then(response => response.json())
-//     //         .then(data => {
-//     //             if (data.success) {
-//     //                 location.reload();
-//     //             } else {
-//     //                 alert('폴더 생성에 실패했습니다.');
-//     //             }
-//     //         })
-//     //         .catch(error => {
-//     //             console.error('폴더 생성 중 오류 발생:', error);
-//     //             alert('폴더 생성 중 오류가 발생했습니다.');
-//     //         });
-
-//     //         // 모달 닫기
-//     //         createFolderModal.hide();
-//     //     } else {
-//     //         alert("폴더 이름을 입력해주세요.");
-//     //     }
-//     // });
-// });
+//폴더 수정
+function update_folder() {
+    console.log("폴더 수정 함수 실행됨");
+    // 폴더 수정 로직 추가
+}
 

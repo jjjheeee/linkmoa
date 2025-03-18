@@ -54,11 +54,29 @@ def index(request):
 
     return render(request, "main.html", data)
 
-@require_http_methods(["POST"])
-def create_folder_name(request):
-    folder_name = request.POST.get("folderName")
-    FolderCategory.objects.create(name=folder_name, user_id=request.user.id)
-    return redirect("main")
+@require_http_methods(["POST", "DELETE", "PATCH"])
+def folder_api_class(request):
+    match request.method:
+        case "POST":
+            folder_name = request.POST.get("folderName")
+            FolderCategory.objects.create(name=folder_name, user_id=request.user.id)
+
+            return redirect("main")
+        
+        case "DELETE":
+            data = json.loads(request.body)  # JSON 데이터 파싱
+            folder_id = data.get("folder_id")
+            folder = FolderCategory.objects.get(id=folder_id)
+            folder.delete()  # 삭제 실행
+
+            return JsonResponse({"success": True, "message": "폴더가 삭제되었습니다."})
+        
+        case "PATCH":
+            data = json.loads(request.body)  # JSON 데이터 파싱
+
+            print("수정")
+            print(data)
+            return JsonResponse({"success": True, "message": "폴더가 수정되었습니다."})
 
 @require_http_methods(["POST"])
 def add_url(request):
@@ -97,5 +115,5 @@ def get_url_data(url):
 @require_http_methods(["GET"])
 def get_urls(request,folder_id):
     urls = UrlList.objects.filter(folder_category=folder_id)
-    urls = [{"name":url.name, "link":url.link,"image":url.image} for url in urls]
+    urls = [{"name":url.name, "link":url.link,"image":url.image, "description":url.description} for url in urls]
     return JsonResponse({'urls': urls})

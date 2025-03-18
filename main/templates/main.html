@@ -18,16 +18,16 @@
                 </ul>
 
                 <!-- 폴더 생성 모달 -->
-                <div class="modal fade" id="createFolderModal" tabindex="-1" aria-labelledby="createFolderModalLabel" aria-hidden="true">
+                <div class="modal fade" id="FolderModal" tabindex="-1" aria-labelledby="FolderModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="createFolderModalLabel">폴더 생성</h5>
+                                <h5 class="modal-title" id="FolderModalLabel">폴더 생성</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <!-- 폴더 이름 입력 폼 -->
-                                <form id="createFolderForm" method="POST" action="/create-folder/">
+                                <form id="FolderForm" method="POST" action="/folder-api/">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="folderNameInput" class="form-label">폴더 이름</label>
@@ -37,7 +37,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                <button type="submit" class="btn btn-primary" form="createFolderForm">저장</button>
+                                <button id="submitFolderButton" type="submit" class="btn btn-primary" form="FolderForm">저장</button>
                             </div>
                         </div>
                     </div>
@@ -71,21 +71,25 @@
                 {% if user.is_authenticated %}
                     <div class="d-flex justify-content-between align-items-center mb-3">
                         <div class="d-flex justify-content-between align-items-center">
-                            <div class="fs-1" id="selectFolder">{{ folders.0.name }}</div>
-                            
-                            <!-- 버튼들 중앙 정렬 -->
-                            <div class="d-flex justify-content-center align-items-center ms-3">
-                                <button class="btn btn-lg"><i class="fi fi-tr-pen-square py-0" style="font-size: 2rem;"></i></button>
-                                <button class="btn btn-lg"><i class="fi fi-rr-trash py-0" style="font-size: 2rem;"></i></button>
-                                <button type="button" class="btn btn-primary ms-5" id="addUrlButton">URL추가</button>
-                            </div>
+                            {% if folders.0.name %}
+                                <div class="fs-1" id="selectFolder">{{ folders.0.name }}</div>
+                                
+                                <!-- 버튼들 중앙 정렬 -->
+                                <div class="d-flex justify-content-center align-items-center ms-3">
+                                    <button id="updateFolder" class="btn btn-lg"><i class="fi fi-tr-pen-square py-0" style="font-size: 2rem;"></i></button>
+                                    <button class="btn btn-lg" onclick="delete_folder()"><i class="fi fi-rr-trash py-0" style="font-size: 2rem;"></i></button>
+                                    <button type="button" class="btn btn-primary ms-5" id="addUrlButton">URL추가</button>
+                                </div>
+                            {% else %}
+                                <div class="fs-1" id="selectFolder">폴더를 먼저 생성해주세요.</div>
+                            {% endif %}
 
                             <!-- URL 추가 모달 -->
-                            <div class="modal fade" id="addUrlModal" tabindex="-1" aria-labelledby="addUrlModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="urlModal" tabindex="-1" aria-labelledby="UrlModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="addUrlModalLabel">URL 추가</h5>
+                                            <h5 class="modal-title" id="UrlModalLabel">URL 추가</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">
@@ -106,7 +110,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                            <button id="submitAddUrlButton" type="button" class="btn btn-primary">저장</button>
+                                            <button id="submitUrlButton" type="button" class="btn btn-primary">저장</button>
                                         </div>
                                     </div>
                                 </div>
