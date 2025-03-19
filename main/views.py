@@ -73,9 +73,9 @@ def folder_api_class(request):
         
         case "PATCH":
             data = json.loads(request.body)  # JSON 데이터 파싱
-
-            print("수정")
-            print(data)
+            folder_id = int(data.get("folder_id"))
+            folder_name = data.get("folderName")
+            FolderCategory.objects.filter(pk=folder_id).update(name=folder_name)
             return JsonResponse({"success": True, "message": "폴더가 수정되었습니다."})
 
 @require_http_methods(["POST"])

@@ -77,7 +77,7 @@
                                 <!-- 버튼들 중앙 정렬 -->
                                 <div class="d-flex justify-content-center align-items-center ms-3">
                                     <button id="updateFolder" class="btn btn-lg"><i class="fi fi-tr-pen-square py-0" style="font-size: 2rem;"></i></button>
-                                    <button class="btn btn-lg" onclick="delete_folder()"><i class="fi fi-rr-trash py-0" style="font-size: 2rem;"></i></button>
+                                    <button class="btn btn-lg" onclick="deleteFolder()"><i class="fi fi-rr-trash py-0" style="font-size: 2rem;"></i></button>
                                     <button type="button" class="btn btn-primary ms-5" id="addUrlButton">URL추가</button>
                                 </div>
                             {% else %}
@@ -110,7 +110,7 @@
                                         </div>
                                         <div class="modal-footer">
                                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                            <button id="submitUrlButton" type="button" class="btn btn-primary">저장</button>
+                                            <button id="submitUrlButton" type="button" class="btn btn-primary" onclick="saveUrl()">저장</button>
                                         </div>
                                     </div>
                                 </div>
