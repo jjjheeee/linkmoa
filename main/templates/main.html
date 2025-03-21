@@ -18,16 +18,16 @@
                 </ul>
 
                 <!-- 폴더 생성 모달 -->
-                <div class="modal fade" id="FolderModal" tabindex="-1" aria-labelledby="FolderModalLabel" aria-hidden="true">
+                <div class="modal fade" id="folderModal" tabindex="-1" aria-labelledby="folderModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <h5 class="modal-title" id="FolderModalLabel">폴더 생성</h5>
+                                <h5 class="modal-title" id="folderModalLabel">폴더 생성</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
                             <div class="modal-body">
                                 <!-- 폴더 이름 입력 폼 -->
-                                <form id="FolderForm" method="POST" action="/folder-api/">
+                                <form id="folderForm" method="POST" action="/folder-api/">
                                     {% csrf_token %}
                                     <div class="mb-3">
                                         <label for="folderNameInput" class="form-label">폴더 이름</label>
@@ -37,7 +37,7 @@
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
-                                <button id="submitFolderButton" type="submit" class="btn btn-primary" form="FolderForm">저장</button>
+                                <button id="submitFolderButton" type="submit" class="btn btn-primary" form="folderForm">저장</button>
                             </div>
                         </div>
                     </div>
@@ -101,11 +101,11 @@
                             {% endif %}
 
                             <!-- URL 추가 모달 -->
-                            <div class="modal fade" id="urlModal" tabindex="-1" aria-labelledby="UrlModalLabel" aria-hidden="true">
+                            <div class="modal fade" id="urlModal" tabindex="-1" aria-labelledby="urlModalLabel" aria-hidden="true">
                                 <div class="modal-dialog">
                                     <div class="modal-content">
                                         <div class="modal-header">
-                                            <h5 class="modal-title" id="UrlModalLabel">URL 추가</h5>
+                                            <h5 class="modal-title" id="urlModalLabel">URL 추가</h5>
                                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                         </div>
                                         <div class="modal-body">

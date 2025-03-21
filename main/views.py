@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.csrf import csrf_exempt
+from django.forms.models import model_to_dict
 
 from .models import User, FolderCategory, UrlList
 from .forms import LoginForm
@@ -107,9 +108,10 @@ def url_api_class(request, folder_id=None):
                 name, image = get_url_data(first_url)
                 finish_url = first_url
 
-            UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
+            new_data = UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
+            url_data = model_to_dict(new_data)
 
-            return JsonResponse({"success": True})
+            return JsonResponse({"success": True, "data":url_data})
         
         case "DELETE":
 

@@ -2,14 +2,15 @@ let selectedFolderId = null;
 let urlList = null;
 
 document.addEventListener("DOMContentLoaded", function () {
+    
+    // folder data 
     const folderLinks = document.querySelectorAll(".folder-name");
     const selectFolder = document.getElementById("selectFolder");
-    const addUrlButton = document.getElementById("addUrlButton");
     const createFolderButton = document.getElementById("createFolder");
     const updateFolderButton = document.getElementById("updateFolder");
-    const submitButton = document.getElementById("submitFolderButton");
-    const FolderModal = new bootstrap.Modal(document.getElementById("FolderModal"));
-
+    const submitForderButton = document.getElementById("submitFolderButton");
+    const folderModal = new bootstrap.Modal(document.getElementById("folderModal"));
+    
     if (folderLinks.length > 0) {
         selectedFolderId = folderLinks[0].dataset.folderId;
         loadUrlsForFolder(selectedFolderId);
@@ -24,32 +25,44 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    createFolderButton.addEventListener("click", function () {
+        folderModal.show();
+        document.getElementById("folderNameInput").value = '';
+    });
+
+    updateFolderButton.addEventListener("click", function () {
+        folderModal.show();
+        document.getElementById("folderNameInput").value = selectFolder.textContent;
+        document.getElementById("folderModalLabel").textContent = "폴더 수정";
+        submitForderButton.textContent = "수정";
+    });
+
+    submitForderButton.addEventListener("click", function (event) {
+        if (submitForderButton.textContent !== "수정") return;
+        event.preventDefault();
+        updateFolder();
+    });
+
+    // url data
+    // const updateUrlButton = document.getElementById("updateUrl");
+    const addUrlButton = document.getElementById("addUrlButton");
+    const urlModal = new bootstrap.Modal(document.getElementById("urlModal"));
+
     if (addUrlButton) {
         addUrlButton.addEventListener("click", function () {
             if (!selectedFolderId) return alert("폴더를 먼저 생성해주세요.");
-            const UrlModal = new bootstrap.Modal(document.getElementById("urlModal"));
-            UrlModal.show();
+            urlModal.show();
             document.getElementById("urlInput").value = '';
             document.getElementById("aliasInput").value = '';
         });
     }
 
-    createFolderButton.addEventListener("click", function () {
-        FolderModal.show();
-        document.getElementById("folderNameInput").value = '';
-    });
+    // updateUrlButton.addEventListener("click", function () {
+    //     urlModal.show();
+    //     document.getElementById("urlModalLabel").textContent = "URL 수정";
+    //     submitForderButton.textContent = "수정";
+    // });
 
-    updateFolderButton.addEventListener("click", function () {
-        FolderModal.show();
-        document.getElementById("FolderModalLabel").textContent = "폴더 수정";
-        submitButton.textContent = "수정";
-    });
-
-    submitButton.addEventListener("click", function (event) {
-        if (submitButton.textContent !== "수정") return;
-        event.preventDefault();
-        updateFolder();
-    });
 });
 
 // **************************************** folder api start ****************************************
@@ -83,6 +96,31 @@ function deleteFolder() {
 
 // **************************************** url api start ****************************************
 
+// 이벤트 위임 방식으로 클릭 이벤트 처리
+document.getElementById("url-list-container").addEventListener("click", function (event) {
+    // url의 삭제 버튼
+    if (event.target.closest(".delete-url-btn")) {
+        const urlId = event.target.closest(".delete-url-btn").getAttribute("data-url");
+        deleteUrl(urlId);
+    }
+    
+    // url 수정 버튼
+    if(event.target.closest("#updateUrl")) {
+
+        const submitUrlButton = document.getElementById("submitUrlButton");
+        const urlModal = new bootstrap.Modal(document.getElementById("urlModal"));
+
+        document.getElementById("urlModalLabel").textContent = "URL 수정";
+        submitUrlButton.textContent = "수정";
+        urlModal.show();
+        // #############################
+        // document.getElementById("urlInput").value = '';
+        // document.getElementById("aliasInput").value = '';
+    }
+
+
+});
+
 function loadUrlsForFolder(folderId) {
     fetch(`/urls-api/${folderId}/`)
         .then(response => response.json())
@@ -96,11 +134,45 @@ function loadUrlsForFolder(folderId) {
         .catch(error => console.error('Error fetching URL data:', error));
 }
 
-function saveUrl() {
+// function saveUrl() {
+//     const url = document.getElementById("urlInput").value.trim();
+//     const alias = document.getElementById("aliasInput").value.trim();
+//     if (!url) return alert("URL을 입력하세요.");
+//     toggleLoading(true);
+//     fetch("/urls-api/", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+//         body: JSON.stringify({ url, description: alias, folder_id: selectedFolderId })
+//     })
+//     .then(response => response.json())
+//     .then(data => {
+//         if (data.success) {
+//             bootstrap.Modal.getInstance(document.getElementById("urlModal")).hide();
+//             loadUrlsForFolder(selectedFolderId);
+//         } else alert("오류 발생: " + data.message);
+//     })
+//     .catch(error => console.error("Error:", error))
+//     .finally(() => toggleLoading(false));
+// }
+
+async function saveUrl() {
     const url = document.getElementById("urlInput").value.trim();
     const alias = document.getElementById("aliasInput").value.trim();
     if (!url) return alert("URL을 입력하세요.");
-    toggleLoading(true);
+    bootstrap.Modal.getInstance(document.getElementById("urlModal")).hide();
+
+    // ⏳ 1. 즉시 UI에 "추가 중..." 표시
+    const urlContainer = document.getElementById('url-list-container');
+    const tempId = `temp-${Date.now()}`;
+    urlContainer.innerHTML += `
+        <div id="${tempId}" class="col">
+            <div class="card border border-1 border-secondary rounded-3">
+                <div class="card-body text-center text-muted">⏳ 추가 중...</div>
+            </div>
+        </div>
+    `;
+
+    // 🕹 2. fetch()를 백그라운드에서 실행 (await 사용 X)
     fetch("/urls-api/", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
@@ -109,25 +181,26 @@ function saveUrl() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            bootstrap.Modal.getInstance(document.getElementById("urlModal")).hide();
-            loadUrlsForFolder(selectedFolderId);
-        } else alert("오류 발생: " + data.message);
+            // 3. ✅ 새 URL 추가 & UI 업데이트
+            document.getElementById(tempId).remove();  // "추가 중..." 제거
+            urlContainer.innerHTML += urlCard(data.data);
+            // loadUrlsForFolder(selectedFolderId);
+        } else {
+            alert("오류 발생: " + data.message);
+            document.getElementById(tempId).remove();
+        }
     })
-    .catch(error => console.error("Error:", error))
-    .finally(() => toggleLoading(false));
+    .catch(error => {
+        console.error("Error:", error);
+        document.getElementById(tempId).remove();
+    });
 }
-
-// 이벤트 위임 방식으로 클릭 이벤트 처리
-document.addEventListener("click", function (event) {
-    if (event.target.closest(".delete-url-btn")) {
-        const urlId = event.target.closest(".delete-url-btn").getAttribute("data-url");
-        
-        deleteUrl(urlId);
-    }
-});
 
 // 삭제 함수
 function deleteUrl(urlId) {
+
+    const deleteUrlCard = document.getElementById(`url_${urlId}`)
+
     if (!confirm("해당 URL을 삭제하시겠습니까?")) return;
     fetch("/urls-api/", {
         method: "DELETE",
@@ -135,7 +208,8 @@ function deleteUrl(urlId) {
         body: JSON.stringify({ urlId: urlId })
     })
     .then(response => response.json())
-    .then(data => data.success ? loadUrlsForFolder(selectedFolderId) : alert(data.error))
+    .then(data => data.success ? deleteUrlCard.remove() : alert(data.error))
+    // .then(data => data.success ? loadUrlsForFolder(selectedFolderId) : alert(data.error))
     .catch(error => console.error("Error:", error));
 }
 
@@ -174,8 +248,8 @@ function searchUrls() {
 
 function urlCard(url) {
     return `
-        <div class="col">
-            <div class="card">
+        <div id="url_${url.id}" class="col">
+            <div class="card border border-1 border-dark rounded-3 rounded-bottom">
                 <a href="${url.link}" class="text-decoration-none" target="_blank">
                     <img src="${url.image}" class="card-img-top" alt="사이트 썸네일">
                 </a>
@@ -183,7 +257,7 @@ function urlCard(url) {
                     <h5 class="card-title">${url.name}</h5>
                     ${url.description ? `<p class="card-text">${url.description}</p>` : ""}
                     <div class="d-flex align-items-center gap-3 justify-content-end">
-                        <button class="btn btn-outline-primary btn-sm">
+                        <button id="updateUrl" class="btn btn-outline-primary btn-sm">
                             <i class="fi fi-tr-pen-square"></i>
                         </button>
                         <button class="btn btn-outline-danger btn-sm delete-url-btn" data-url='${JSON.stringify(url.id)}'>
