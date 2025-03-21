@@ -14,6 +14,10 @@
     text-overflow: ellipsis;
 }
 
+.d-flex.gap-3 {
+    flex-wrap: wrap;
+}
+
 .masonry-container {
     column-count: 2; /* 기본적으로 모바일에서는 2열 */
     column-gap: 16px;

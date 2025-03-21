@@ -78,28 +78,48 @@ def folder_api_class(request):
             FolderCategory.objects.filter(pk=folder_id).update(name=folder_name)
             return JsonResponse({"success": True, "message": "폴더가 수정되었습니다."})
 
-@require_http_methods(["POST"])
-def add_url(request):
-    data = json.loads(request.body)  # JSON 데이터 파싱
-    folder_id = data.get("folder_id")
-    first_url = data.get("url")
-    description = data.get("description")
+@require_http_methods(["GET", "POST", "DELETE", "PATCH"])
+def url_api_class(request, folder_id=None):
+    match request.method:
+        case "GET":
 
-    split_url = first_url.split("//")
-    if not split_url[1][:4] == "www." :
-        finish_url = split_url[0] + "//www." + split_url[1]
-    else:
-        finish_url = first_url
-    
-    try:
-        name, image = get_url_data(finish_url)
-    except:
-        name, image = get_url_data(first_url)
-        finish_url = first_url
+            urls = UrlList.objects.filter(folder_category=folder_id)
+            urls = [{"id": url.id, "name":url.name, "link":url.link,"image":url.image, "description":url.description} for url in urls]
 
-    UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
+            return JsonResponse({'urls': urls})
+        
+        case "POST":
 
-    return JsonResponse({"success": True})
+            data = json.loads(request.body)  # JSON 데이터 파싱
+            folder_id = data.get("folder_id")
+            first_url = data.get("url")
+            description = data.get("description")
+
+            split_url = first_url.split("//")
+            if not split_url[1][:4] == "www." :
+                finish_url = split_url[0] + "//www." + split_url[1]
+            else:
+                finish_url = first_url
+            
+            try:
+                name, image = get_url_data(finish_url)
+            except:
+                name, image = get_url_data(first_url)
+                finish_url = first_url
+
+            UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
+
+            return JsonResponse({"success": True})
+        
+        case "DELETE":
+
+            data = json.loads(request.body)  # JSON 데이터 파싱
+            url_id = data.get("urlId")
+
+            url = UrlList.objects.get(id=url_id)
+            url.delete()  # 삭제 실행
+
+            return JsonResponse({"success": True, "message": "URL이 삭제되었습니다."})
 
 def get_url_data(url):
     open_graph_url = os.getenv("GET_URL_DATA_API")
@@ -111,9 +131,3 @@ def get_url_data(url):
     image = response_data.get("image").get("url")
 
     return name, image
-
-@require_http_methods(["GET"])
-def get_urls(request,folder_id):
-    urls = UrlList.objects.filter(folder_category=folder_id)
-    urls = [{"name":url.name, "link":url.link,"image":url.image, "description":url.description} for url in urls]
-    return JsonResponse({'urls': urls})
