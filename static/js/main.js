@@ -127,3 +127,9 @@ function toggleLoading(isLoading) {
 function getCsrfToken() {
     return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 }
+
+var msnry = new Masonry('.masonry-container', {
+    itemSelector: '.masonry-item',
+    columnWidth: 200,
+    gutter: 16
+});
