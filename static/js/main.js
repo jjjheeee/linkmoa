@@ -1,5 +1,6 @@
 let selectedFolderId = null;
 let updateFolderId = null;
+let updateUrlId = null;
 let urlList = null;
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -59,6 +60,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (addUrlButton) {
         addUrlButton.addEventListener("click", function () {
             if (!selectedFolderId) return alert("폴더를 먼저 생성해주세요.");
+            document.getElementById("urlModalDropdown").style.visibility = "hidden";
             urlModal.show();
             document.getElementById("urlInput").value = '';
             document.getElementById("aliasInput").value = '';
@@ -75,7 +77,6 @@ document.addEventListener("DOMContentLoaded", function () {
             // 폴더 이름을 버튼에 반영
             document.getElementById("folderDropdown").textContent = folderName;
 
-            console.log("선택된 폴더 ID:", updateFolderId);
         }
     });
 
@@ -132,9 +133,11 @@ document.getElementById("url-list-container").addEventListener("click", function
         const submitUrlButton = document.getElementById("submitUrlButton");
         const urlModal = new bootstrap.Modal(document.getElementById("urlModal"));
 
+        updateUrlId = urlData.id
         document.getElementById("urlModalLabel").textContent = "URL 수정";
         submitUrlButton.textContent = "수정";
         submitUrlButton.onclick = updateUrl
+        document.getElementById("urlModalDropdown").style.visibility = "visible";
         urlModal.show();
         document.getElementById("urlInput").value = urlData.link;
         document.getElementById("urlInput").disabled = true
@@ -225,18 +228,33 @@ async function saveUrl() {
 
 // url 수정 함수
 function updateUrl() {
-
-    const aliasInput = document.getElementById("aliasInput").value
+    const modalElement = document.getElementById("urlModal");
+    const aliasInput = document.getElementById("aliasInput").value;
 
     fetch("/urls-api/", {
         method: "PATCH",
         headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
         body: JSON.stringify({ 
+            updateUrlId: updateUrlId,
             updateFolderId: updateFolderId,
             alias: aliasInput
         })
     })
     .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            loadUrlsForFolder(selectedFolderId); // 목록 새로고침
+
+            // 모달 닫기
+            const modalInstance = bootstrap.Modal.getInstance(modalElement);
+            if (modalInstance) {
+                modalInstance.hide();
+            }
+        } else {
+            alert("수정 실패: " + data.message);
+        }
+    })
+    .catch(error => console.error("Error:", error));
 }
 
 // url 삭제 함수

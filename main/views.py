@@ -124,8 +124,26 @@ def url_api_class(request, folder_id=None):
             return JsonResponse({"success": True, "message": "URL이 삭제되었습니다."})
 
         case "PATCH":
+            
             data = json.loads(request.body)
-            print(data)
+            url_id = data.get("updateUrlId")
+
+            update_fields = {}
+            
+            if data.get("updateFolderId"):
+                update_fields["folder_category_id"] = int(data.get("updateFolderId"))
+
+            if data.get("alias"):
+                update_fields["description"] = data.get("alias")
+
+            if update_fields:
+                url_instance = UrlList.objects.get(pk=url_id)
+
+                for field, value in update_fields.items():
+                    setattr(url_instance, field, value)
+
+                url_instance.save()
+
             return JsonResponse({"success": True, "message": "URL이 수정되었습니다."})
 
 def get_url_data(url):
