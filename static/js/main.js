@@ -1,9 +1,10 @@
 let selectedFolderId = null;
+let updateFolderId = null;
 let urlList = null;
 
 document.addEventListener("DOMContentLoaded", function () {
     
-    // folder data 
+    // folder data 세팅
     const folderLinks = document.querySelectorAll(".folder-name");
     const selectFolder = document.getElementById("selectFolder");
     const createFolderButton = document.getElementById("createFolder");
@@ -11,11 +12,13 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitForderButton = document.getElementById("submitFolderButton");
     const folderModal = new bootstrap.Modal(document.getElementById("folderModal"));
     
+    // 초기화면 url list 세팅
     if (folderLinks.length > 0) {
         selectedFolderId = folderLinks[0].dataset.folderId;
         loadUrlsForFolder(selectedFolderId);
     }
 
+    // 폴더 클릭하면 해당 폴더 안에 url list 세팅
     folderLinks.forEach(link => {
         link.addEventListener("click", function (event) {
             event.preventDefault();
@@ -25,11 +28,14 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // 폴더 생성 버튼 클릭
     createFolderButton.addEventListener("click", function () {
         folderModal.show();
+        
         document.getElementById("folderNameInput").value = '';
     });
 
+    // 폴더 수정 버튼 클릭
     updateFolderButton.addEventListener("click", function () {
         folderModal.show();
         document.getElementById("folderNameInput").value = selectFolder.textContent;
@@ -37,6 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
         submitForderButton.textContent = "수정";
     });
 
+    // 폴더 모달에서 submit 버튼 (수정일시)
     submitForderButton.addEventListener("click", function (event) {
         if (submitForderButton.textContent !== "수정") return;
         event.preventDefault();
@@ -48,6 +55,7 @@ document.addEventListener("DOMContentLoaded", function () {
     const addUrlButton = document.getElementById("addUrlButton");
     const urlModal = new bootstrap.Modal(document.getElementById("urlModal"));
 
+    // url 생성 버튼 클릭
     if (addUrlButton) {
         addUrlButton.addEventListener("click", function () {
             if (!selectedFolderId) return alert("폴더를 먼저 생성해주세요.");
@@ -57,16 +65,25 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // updateUrlButton.addEventListener("click", function () {
-    //     urlModal.show();
-    //     document.getElementById("urlModalLabel").textContent = "URL 수정";
-    //     submitForderButton.textContent = "수정";
-    // });
+    // 드롭다운 항목 클릭 시 폴더 이름을 버튼에 반영하고 폴더 ID 저장
+    document.querySelector('.dropdown-menu').addEventListener('click', function (event) {
+        const folderItem = event.target.closest('.dropdown-item');
+        if (folderItem) {
+            const folderName = folderItem.getAttribute('data-folder-name');  // 폴더 이름
+            updateFolderId = folderItem.getAttribute('data-folder-id');   // 폴더 ID
+
+            // 폴더 이름을 버튼에 반영
+            document.getElementById("folderDropdown").textContent = folderName;
+
+            console.log("선택된 폴더 ID:", updateFolderId);
+        }
+    });
 
 });
 
 // **************************************** folder api start ****************************************
 
+// 폴더 수정
 function updateFolder() {
     const folderName = document.getElementById("folderNameInput").value.trim();
     if (!folderName) return alert("폴더 이름을 입력하세요.");
@@ -80,6 +97,7 @@ function updateFolder() {
     .catch(error => console.error("Error:", error));
 }
 
+// 폴더 삭제
 function deleteFolder() {
     if (!confirm("이 폴더를 삭제하시겠습니까?")) return;
     fetch("/folder-api/", {
@@ -98,29 +116,36 @@ function deleteFolder() {
 
 // 이벤트 위임 방식으로 클릭 이벤트 처리
 document.getElementById("url-list-container").addEventListener("click", function (event) {
-    // url의 삭제 버튼
+
+    // url의 삭제 버튼 클릭
     if (event.target.closest(".delete-url-btn")) {
         const urlId = event.target.closest(".delete-url-btn").getAttribute("data-url");
-        deleteUrl(urlId);
+        deleteUrl(urlId); // url 삭제
     }
     
-    // url 수정 버튼
+    // url 수정 버튼 클릭시 url 모달 세팅
     if(event.target.closest("#updateUrl")) {
 
+        updateFolderId = null
+        const urlDataString = event.target.closest("#updateUrl").getAttribute("data-url");
+        const urlData = JSON.parse(urlDataString); // 문자열 → JSON 객체 변환
         const submitUrlButton = document.getElementById("submitUrlButton");
         const urlModal = new bootstrap.Modal(document.getElementById("urlModal"));
 
         document.getElementById("urlModalLabel").textContent = "URL 수정";
         submitUrlButton.textContent = "수정";
+        submitUrlButton.onclick = updateUrl
         urlModal.show();
-        // #############################
-        // document.getElementById("urlInput").value = '';
-        // document.getElementById("aliasInput").value = '';
+        document.getElementById("urlInput").value = urlData.link;
+        document.getElementById("urlInput").disabled = true
+        document.getElementById("aliasInput").value = urlData.description;
+        document.getElementById("folderDropdown").textContent = '폴더 선택';
     }
 
 
 });
 
+// 폴더에 해당하는 url list 가져오는 함수
 function loadUrlsForFolder(folderId) {
     fetch(`/urls-api/${folderId}/`)
         .then(response => response.json())
@@ -155,13 +180,14 @@ function loadUrlsForFolder(folderId) {
 //     .finally(() => toggleLoading(false));
 // }
 
+// url 저장 함수
 async function saveUrl() {
     const url = document.getElementById("urlInput").value.trim();
     const alias = document.getElementById("aliasInput").value.trim();
     if (!url) return alert("URL을 입력하세요.");
     bootstrap.Modal.getInstance(document.getElementById("urlModal")).hide();
 
-    // ⏳ 1. 즉시 UI에 "추가 중..." 표시
+    // 즉시 UI에 "추가 중..." 표시
     const urlContainer = document.getElementById('url-list-container');
     const tempId = `temp-${Date.now()}`;
     urlContainer.innerHTML += `
@@ -172,7 +198,7 @@ async function saveUrl() {
         </div>
     `;
 
-    // 🕹 2. fetch()를 백그라운드에서 실행 (await 사용 X)
+    // fetch()를 백그라운드에서 실행 (await 사용 X)
     fetch("/urls-api/", {
         method: "POST",
         headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
@@ -181,22 +207,39 @@ async function saveUrl() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // 3. ✅ 새 URL 추가 & UI 업데이트
-            document.getElementById(tempId).remove();  // "추가 중..." 제거
+            // 새 URL 추가 & UI 업데이트
             urlContainer.innerHTML += urlCard(data.data);
             // loadUrlsForFolder(selectedFolderId);
         } else {
             alert("오류 발생: " + data.message);
-            document.getElementById(tempId).remove();
         }
     })
     .catch(error => {
         console.error("Error:", error);
+        
+    })
+    .finally(()=>{
         document.getElementById(tempId).remove();
     });
 }
 
-// 삭제 함수
+// url 수정 함수
+function updateUrl() {
+
+    const aliasInput = document.getElementById("aliasInput").value
+
+    fetch("/urls-api/", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
+        body: JSON.stringify({ 
+            updateFolderId: updateFolderId,
+            alias: aliasInput
+        })
+    })
+    .then(response => response.json())
+}
+
+// url 삭제 함수
 function deleteUrl(urlId) {
 
     const deleteUrlCard = document.getElementById(`url_${urlId}`)
@@ -215,12 +258,14 @@ function deleteUrl(urlId) {
 
 // **************************************** url api end ****************************************
 
+// loading toggle 함수
 function toggleLoading(isLoading) {
     document.getElementById("loadingSpinner").style.display = isLoading ? "block" : "none";
     document.getElementById("urlInput").disabled = isLoading;
     document.getElementById("aliasInput").disabled = isLoading;
 }
 
+// csrf 토큰 가져오는 함수
 function getCsrfToken() {
     return document.querySelector('input[name="csrfmiddlewaretoken"]').value;
 }
@@ -231,6 +276,7 @@ function getCsrfToken() {
 //     gutter: 16
 // });
 
+// url list에서 검색하는 함수
 function searchUrls() {
     const searchName = document.getElementById("folderSearch").value;
     const urlContainer = document.getElementById('url-list-container');
@@ -246,6 +292,7 @@ function searchUrls() {
     ).join('') : '<p>검색된 URL이 없습니다.</p>';
 }
 
+// url 카드 리턴 해주는 함수
 function urlCard(url) {
     return `
         <div id="url_${url.id}" class="col">
@@ -257,7 +304,7 @@ function urlCard(url) {
                     <h5 class="card-title">${url.name}</h5>
                     ${url.description ? `<p class="card-text">${url.description}</p>` : ""}
                     <div class="d-flex align-items-center gap-3 justify-content-end">
-                        <button id="updateUrl" class="btn btn-outline-primary btn-sm">
+                        <button id="updateUrl" class="btn btn-outline-primary btn-sm" data-url='${JSON.stringify(url)}'>
                             <i class="fi fi-tr-pen-square"></i>
                         </button>
                         <button class="btn btn-outline-danger btn-sm delete-url-btn" data-url='${JSON.stringify(url.id)}'>

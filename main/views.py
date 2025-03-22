@@ -110,7 +110,7 @@ def url_api_class(request, folder_id=None):
 
             new_data = UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
             url_data = model_to_dict(new_data)
-
+            
             return JsonResponse({"success": True, "data":url_data})
         
         case "DELETE":
@@ -122,6 +122,11 @@ def url_api_class(request, folder_id=None):
             url.delete()  # 삭제 실행
 
             return JsonResponse({"success": True, "message": "URL이 삭제되었습니다."})
+
+        case "PATCH":
+            data = json.loads(request.body)
+            print(data)
+            return JsonResponse({"success": True, "message": "URL이 수정되었습니다."})
 
 def get_url_data(url):
     open_graph_url = os.getenv("GET_URL_DATA_API")
