@@ -190,9 +190,16 @@ async function saveUrl() {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
+
+
+
+            // ################################# 고민
             // 새 URL 추가 & UI 업데이트
-            urlContainer.innerHTML += urlCard(data.data);
-            // loadUrlsForFolder(selectedFolderId);
+            // urlContainer.innerHTML += urlCard(data.data);
+            loadUrlsForFolder(selectedFolderId);
+
+
+            
         } else {
             alert("오류 발생: " + data.message);
         }
@@ -249,8 +256,17 @@ function deleteUrl(urlId) {
         body: JSON.stringify({ urlId: urlId })
     })
     .then(response => response.json())
-    .then(data => data.success ? deleteUrlCard.remove() : alert(data.error))
-    // .then(data => data.success ? loadUrlsForFolder(selectedFolderId) : alert(data.error))
+
+
+
+
+    // ##############################   고민
+    // .then(data => data.success ? deleteUrlCard.remove() : alert(data.error))
+    .then(data => data.success ? loadUrlsForFolder(selectedFolderId) : alert(data.error))
+
+
+
+    
     .catch(error => console.error("Error:", error));
 }
 
