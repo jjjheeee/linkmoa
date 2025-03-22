@@ -62,6 +62,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!selectedFolderId) return alert("폴더를 먼저 생성해주세요.");
             document.getElementById("urlModalDropdown").style.visibility = "hidden";
             urlModal.show();
+            document.getElementById("urlInput").disabled = false
             document.getElementById("urlInput").value = '';
             document.getElementById("aliasInput").value = '';
         });
@@ -161,27 +162,6 @@ function loadUrlsForFolder(folderId) {
         })
         .catch(error => console.error('Error fetching URL data:', error));
 }
-
-// function saveUrl() {
-//     const url = document.getElementById("urlInput").value.trim();
-//     const alias = document.getElementById("aliasInput").value.trim();
-//     if (!url) return alert("URL을 입력하세요.");
-//     toggleLoading(true);
-//     fetch("/urls-api/", {
-//         method: "POST",
-//         headers: { "Content-Type": "application/json", "X-CSRFToken": getCsrfToken() },
-//         body: JSON.stringify({ url, description: alias, folder_id: selectedFolderId })
-//     })
-//     .then(response => response.json())
-//     .then(data => {
-//         if (data.success) {
-//             bootstrap.Modal.getInstance(document.getElementById("urlModal")).hide();
-//             loadUrlsForFolder(selectedFolderId);
-//         } else alert("오류 발생: " + data.message);
-//     })
-//     .catch(error => console.error("Error:", error))
-//     .finally(() => toggleLoading(false));
-// }
 
 // url 저장 함수
 async function saveUrl() {
