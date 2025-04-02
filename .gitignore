@@ -173,5 +173,6 @@ cython_debug/
 
 # SQLite 데이터베이스 무시
 db.sqlite3
+db_production.sqlite3
 
 staticfiles/
