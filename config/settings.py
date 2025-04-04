@@ -88,10 +88,25 @@ ENVIRONMENT = os.getenv("DJANGO_ENV", "dev")
 if ENVIRONMENT == "production":
     DATABASES = {
         "default": {
-            "ENGINE": "django.db.backends.sqlite3",
-            "NAME": BASE_DIR / "db_production.sqlite3",  # 배포 환경용 SQLite 파일
+            "ENGINE": "django.db.backends.mysql",
+            "NAME": os.getenv("LINKMOA_DB_NAME"),
+            "USER": os.getenv("LINKMOA_DB_USER"),
+            "PASSWORD": os.getenv("LINKMOA_DB_PASSWORD"),
+            "HOST": os.getenv("LINKMOA_DB_HOST"),
+            "PORT": os.getenv("LINKMOA_DB_PORT"),
+            "OPTIONS": {
+                "charset": "utf8mb4",
+                "init_command": "SET sql_mode='STRICT_TRANS_TABLES'"
+            }
         }
     }
+
+    # DATABASES = {
+    #     "default": {
+    #         "ENGINE": "django.db.backends.sqlite3",
+    #         "NAME": BASE_DIR / "db_production.sqlite3",  # 배포 환경용 SQLite 파일
+    #     }
+    # }
 else:
     DATABASES = {
         "default": {
