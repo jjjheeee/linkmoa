@@ -34,6 +34,8 @@ document.addEventListener("DOMContentLoaded", function () {
         folderModal.show();
         
         document.getElementById("folderNameInput").value = '';
+        document.getElementById("folderModalLabel").textContent = "폴더 생성";
+        submitForderButton.textContent = "저장";
     });
 
     // 폴더 수정 버튼 클릭
@@ -58,10 +60,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // url 생성 버튼 클릭
     if (addUrlButton) {
+        const submitUrlButton = document.getElementById("submitUrlButton");
         addUrlButton.addEventListener("click", function () {
             if (!selectedFolderId) return alert("폴더를 먼저 생성해주세요.");
             document.getElementById("urlModalDropdown").style.visibility = "hidden";
             urlModal.show();
+            document.getElementById("urlModalLabel").textContent = "URL 저장";
+            submitUrlButton.textContent = "저장";
+            submitUrlButton.onclick = saveUrl
             document.getElementById("urlInput").disabled = false
             document.getElementById("urlInput").value = '';
             document.getElementById("aliasInput").value = '';
@@ -129,10 +135,11 @@ document.getElementById("url-list-container").addEventListener("click", function
     if(event.target.closest("#updateUrl")) {
 
         updateFolderId = null
+        const modalElement = document.getElementById("urlModal");
         const urlDataString = event.target.closest("#updateUrl").getAttribute("data-url");
         const urlData = JSON.parse(urlDataString); // 문자열 → JSON 객체 변환
         const submitUrlButton = document.getElementById("submitUrlButton");
-        const urlModal = new bootstrap.Modal(document.getElementById("urlModal"));
+        const urlModal = bootstrap.Modal.getInstance(modalElement);
 
         updateUrlId = urlData.id
         document.getElementById("urlModalLabel").textContent = "URL 수정";
@@ -165,10 +172,16 @@ function loadUrlsForFolder(folderId) {
 
 // url 저장 함수
 async function saveUrl() {
+    const modalElement = document.getElementById("urlModal");
     const url = document.getElementById("urlInput").value.trim();
     const alias = document.getElementById("aliasInput").value.trim();
+
     if (!url) return alert("URL을 입력하세요.");
-    bootstrap.Modal.getInstance(document.getElementById("urlModal")).hide();
+
+    const modalInstance = bootstrap.Modal.getInstance(modalElement);
+    if (modalInstance) {
+        modalInstance.hide();
+    }
 
     // 즉시 UI에 "추가 중..." 표시
     const urlContainer = document.getElementById('url-list-container');
@@ -312,7 +325,7 @@ function urlCard(url) {
         <div id="url_${url.id}" class="col">
             <div class="card border border-1 border-dark rounded-3 rounded-bottom">
                 <a href="${url.link}" class="text-decoration-none" target="_blank">
-                    <img src="${url.image}" class="card-img-top" alt="사이트 썸네일">
+                    <img src="${url.image}" class="card-img-top" alt="사이트 썸네일안나오면 썸네일을 못가져와요 ㅠ">
                 </a>
                 <div class="card-body">
                     <h5 class="card-title">${url.name}</h5>

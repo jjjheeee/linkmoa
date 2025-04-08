@@ -90,7 +90,6 @@ def url_api_class(request, folder_id=None):
             return JsonResponse({'urls': urls})
         
         case "POST":
-
             data = json.loads(request.body)  # JSON 데이터 파싱
             folder_id = data.get("folder_id")
             first_url = data.get("url")
@@ -99,16 +98,13 @@ def url_api_class(request, folder_id=None):
             split_url = first_url.split("//")
             if not split_url[1][:4] == "www." :
                 finish_url = split_url[0] + "//www." + split_url[1]
-            else:
-                finish_url = first_url
-            
+                
             try:
-                name, image = get_url_data(finish_url)
+                set_url, name, image = get_url_data(finish_url)
             except:
-                name, image = get_url_data(first_url)
-                finish_url = first_url
+                set_url, name, image = get_url_data(first_url)
 
-            new_data = UrlList.objects.create(name=name, link=finish_url, image=image, folder_category_id=folder_id, description=description)
+            new_data = UrlList.objects.create(name=name, link=first_url, image=image, folder_category_id=folder_id, description=description)
             url_data = model_to_dict(new_data)
             
             return JsonResponse({"success": True, "data":url_data})
@@ -143,16 +139,20 @@ def url_api_class(request, folder_id=None):
                     setattr(url_instance, field, value)
 
                 url_instance.save()
-
+            
             return JsonResponse({"success": True, "message": "URL이 수정되었습니다."})
 
 def get_url_data(url):
     open_graph_url = os.getenv("GET_URL_DATA_API")
     params = {'url': url}
     response = requests.get(open_graph_url, params).json()
-
+    print(response)
     response_data = response.get("data")
     name = response_data.get("title")
-    image = response_data.get("image").get("url")
+    set_url = response_data.get("url")
+    try:
+        image = response_data.get("image").get("url")
+    except:
+        image = None
 
-    return name, image
+    return set_url, name, image
