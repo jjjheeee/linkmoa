@@ -100,9 +100,9 @@ def url_api_class(request, folder_id=None):
                 finish_url = split_url[0] + "//www." + split_url[1]
                 
             try:
-                set_url, name, image = get_url_data(finish_url)
+                _, name, image = get_url_data(finish_url)
             except:
-                set_url, name, image = get_url_data(first_url)
+                _, name, image = get_url_data(first_url)
 
             new_data = UrlList.objects.create(name=name, link=first_url, image=image, folder_category_id=folder_id, description=description)
             url_data = model_to_dict(new_data)
@@ -146,7 +146,6 @@ def get_url_data(url):
     open_graph_url = os.getenv("GET_URL_DATA_API")
     params = {'url': url}
     response = requests.get(open_graph_url, params).json()
-    print(response)
     response_data = response.get("data")
     name = response_data.get("title")
     set_url = response_data.get("url")
