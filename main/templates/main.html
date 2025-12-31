@@ -8,6 +8,9 @@
             <div class="sidebar-heading border-bottom bg-light p-3"><button class="btn btn-primary" id="createFolder">폴더 생성</button></div>
             <div class="list-group list-group-flush">
                 <ul class="list-group">
+                    <li class="list-group-item d-flex justify-content-between align-items-center p-4">
+                        <a href="#" class="folder-name text-decoration-none">급여계산기</a>
+                    </li>
                     {% for folder in folders %}
                         <li class="list-group-item d-flex justify-content-between align-items-center p-4">
                             <a href="#" class="folder-name text-decoration-none" data-folder-id="{{ folder.id }}" data-folder-name="{{ folder.name }}">{{ folder.name }}</a>
